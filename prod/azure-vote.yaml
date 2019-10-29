@@ -18,7 +18,6 @@ data:
   MYSQL_HOST: "YXp1cmUtdm90aW5nLWFwcC1iYWNr"
   MYSQL_ROOT_PASSWORD: "UGFzc3dvcmQxMg=="
 ---
-
 # Source: azure-voting-app/templates/pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -38,7 +37,6 @@ spec:
     requests:
       storage: "1Gi"
 ---
-
 # Source: azure-voting-app/templates/azure-vote-back-svc.yaml
 apiVersion: v1
 kind: Service
@@ -60,7 +58,6 @@ spec:
     release: azure-vote
 
 ---
-
 # Source: azure-voting-app/templates/azure-vote-front-svc.yaml
 apiVersion: v1
 kind: Service
@@ -80,7 +77,6 @@ spec:
     component: azure-voting-app-front
     release: azure-vote
 ---
-
 # Source: azure-voting-app/templates/azure-vote-back-deployment.yaml
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -104,47 +100,45 @@ spec:
         component: azure-voting-app-back
     spec:
       containers:
-      - name: azure-voting-app-back
-        image: "microsoft/azure-vote-back:v1"
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 3306
-          name: mysql
-        args:
-          - --ignore-db-dir=lost+found
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_ROOT_PASSWORD
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_USER
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_PASSWORD
-        - name: MYSQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_DATABASE
-        resources:
-          {}
-          
-      volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: azure-voting-app-mysql-pv-claim
----
+        - name: azure-voting-app-back
+          image: "microsoft/azure-vote-back:v1"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+              name: mysql
+          args:
+            - --ignore-db-dir=lost+found
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_DATABASE
+          resources: {}
 
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: azure-voting-app-mysql-pv-claim
+---
 # Source: azure-voting-app/templates/azure-vote-front-deployment.yaml
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -162,7 +156,7 @@ spec:
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
-  minReadySeconds: 5 
+  minReadySeconds: 5
   template:
     metadata:
       labels:
@@ -173,36 +167,34 @@ spec:
         component: azure-voting-app-front
     spec:
       containers:
-      - name: azure-voting-app-front
-        image: "hellorings.azurecr.io/votingapp:7086"
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
-        env:
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_USER
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_PASSWORD
-        - name: MYSQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_DATABASE
-        - name: MYSQL_HOST
-          valueFrom:
-            secretKeyRef:
-              name: azure-voting-app-azure-vote
-              key: MYSQL_HOST
-        resources:
-          limits:
-            cpu: 500m
-          requests:
-            cpu: 250m
-          
-
+        - name: azure-voting-app-front
+          image: "microsoft/azure-vote-front:v1"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_DATABASE
+            - name: MYSQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: azure-voting-app-azure-vote
+                  key: MYSQL_HOST
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 250m
