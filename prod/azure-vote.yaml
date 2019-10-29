@@ -39,10 +39,7 @@ spec:
   template:
     metadata:
       labels:
-        app: azure-vote
-        heritage: "Tiller"
-        release: "azure-vote"
-        chart: azure-vote-0.1.0
+        app: azure-vote-back
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
@@ -74,10 +71,7 @@ spec:
   template:
     metadata:
       labels:
-        app: azure-vote
-        heritage: "Tiller"
-        release: "azure-vote"
-        chart: azure-vote-0.1.0
+        app: azure-vote-front
     spec:
       nodeSelector:
         "beta.kubernetes.io/os": linux
