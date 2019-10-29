@@ -1,82 +1,169 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: azure-vote-back
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: azure-vote-back
-  template:
-    metadata:
-      labels:
-        app: azure-vote-back
-    spec:
-      nodeSelector:
-        "beta.kubernetes.io/os": linux
-      containers:
-        - name: azure-vote-back
-          image: redis
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 250m
-              memory: 256Mi
-          ports:
-            - containerPort: 6379
-              name: redis
 ---
+---
+# Source: azure-voting-app/templates/azure-vote-back-svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: azure-vote-back
+  name: azure-voting-app-back
+  labels:
+    app: azure-voting-app
+    heritage: "Tiller"
+    release: "azure-vote"
+    chart: azure-voting-app-0.1.0
 spec:
+  type: ClusterIP
   ports:
-    - port: 6379
+    - port: 3306
+      name: mysql
   selector:
-    app: azure-vote-back
+    app: azure-voting-app
+    component: azure-voting-app-back
+    release: azure-vote
+
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: azure-vote-front
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: azure-vote-front
-  template:
-    metadata:
-      labels:
-        app: azure-vote-front
-    spec:
-      nodeSelector:
-        "beta.kubernetes.io/os": linux
-      containers:
-        - name: azure-vote-front
-          image: microsoft/azure-vote-front:v1
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 250m
-              memory: 256Mi
-          ports:
-            - containerPort: 80
-          env:
-            - name: REDIS
-              value: "azure-vote-back"
----
+
+# Source: azure-voting-app/templates/azure-vote-front-svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: azure-vote-front
+  name: azure-voting-app-front
+  labels:
+    app: azure-voting-app
+    heritage: "Tiller"
+    release: "azure-vote"
+    chart: azure-voting-app-0.1.0
 spec:
   type: LoadBalancer
   ports:
     - port: 80
   selector:
-    app: azure-vote-front
+    app: azure-voting-app
+    component: azure-voting-app-front
+    release: azure-vote
+---
+
+# Source: azure-voting-app/templates/azure-vote-back-deployment.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: azure-voting-app-back
+  labels:
+    app: azure-voting-app
+    heritage: "Tiller"
+    release: "azure-vote"
+    chart: azure-voting-app-0.1.0
+    component: azure-voting-app-back
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: azure-voting-app
+        heritage: "Tiller"
+        release: "azure-vote"
+        chart: azure-voting-app-0.1.0
+        component: azure-voting-app-back
+    spec:
+      containers:
+      - name: azure-voting-app-back
+        image: "microsoft/azure-vote-back:v1"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+          name: mysql
+        args:
+          - --ignore-db-dir=lost+found
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_DATABASE
+        resources:
+          {}
+          
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: azure-voting-app-mysql-pv-claim
+---
+
+# Source: azure-voting-app/templates/azure-vote-front-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-voting-app-front
+  labels:
+    app: azure-voting-app
+    heritage: "Tiller"
+    release: "azure-vote"
+    chart: azure-voting-app-0.1.0
+    component: azure-voting-app-front
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: azure-voting-app
+        heritage: "Tiller"
+        release: "azure-vote"
+        chart: azure-voting-app-0.1.0
+        component: azure-voting-app-front
+    spec:
+      containers:
+      - name: azure-voting-app-front
+        image: "hellorings.azurecr.io/votingapp:7086"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_DATABASE
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: azure-voting-app-azure-vote
+              key: MYSQL_HOST
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 250m
+          
+
