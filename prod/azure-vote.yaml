@@ -6,7 +6,6 @@ kind: Service
 metadata:
   name: azure-vote-back
 spec:
-  type: ClusterIP
   ports:
     - port: 3306
   selector:
@@ -34,6 +33,9 @@ metadata:
   name: azure-vote-back
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: azure-vote-back
   template:
     metadata:
       labels:
