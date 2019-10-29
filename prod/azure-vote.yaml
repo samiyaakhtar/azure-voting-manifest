@@ -174,7 +174,7 @@ spec:
     spec:
       containers:
       - name: azure-voting-app-front
-        image: "hellorings.azurecr.io/votingapp:7077"
+        image: "hellorings.azurecr.io/votingapp:7083"
         imagePullPolicy: Always
         ports:
         - containerPort: 80
