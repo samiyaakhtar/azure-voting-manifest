@@ -1,3 +1,32 @@
+---
+---
+# Source: azure-vote/templates/azure-vote-back-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-vote-back
+spec:
+  ports:
+    - port: 6379
+  selector:
+    app: azure-vote-back
+
+---
+
+# Source: azure-vote/templates/azure-vote-front-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-vote-front
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: azure-vote-front
+---
+
+# Source: azure-vote/templates/azure-vote-back-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,16 +57,8 @@ spec:
             - containerPort: 6379
               name: redis
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: azure-vote-back
-spec:
-  ports:
-    - port: 6379
-  selector:
-    app: azure-vote-back
----
+
+# Source: azure-vote/templates/azure-vote-front-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -69,14 +90,4 @@ spec:
           env:
             - name: REDIS
               value: "azure-vote-back"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: azure-vote-front
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-  selector:
-    app: azure-vote-front
+
