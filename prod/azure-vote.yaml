@@ -12,7 +12,6 @@ spec:
     app: azure-vote-back
 
 ---
-
 # Source: azure-vote/templates/azure-vote-front-svc.yaml
 apiVersion: v1
 kind: Service
@@ -25,7 +24,6 @@ spec:
   selector:
     app: azure-vote-front
 ---
-
 # Source: azure-vote/templates/azure-vote-back-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -57,7 +55,6 @@ spec:
             - containerPort: 6379
               name: redis
 ---
-
 # Source: azure-vote/templates/azure-vote-front-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -77,7 +74,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
         - name: azure-vote-front
-          image: hellorings.azurecr.io/votingapp:7136
+          image: microsoft/azure-vote-front:v1
           resources:
             requests:
               cpu: 100m
@@ -90,4 +87,3 @@ spec:
           env:
             - name: REDIS
               value: "azure-vote-back"
-
