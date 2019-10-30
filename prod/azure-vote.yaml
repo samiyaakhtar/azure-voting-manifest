@@ -1,4 +1,32 @@
 ---
+---
+# Source: azure-vote/templates/azure-vote-back-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-vote-back
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: azure-vote-back
+
+---
+
+# Source: azure-vote/templates/azure-vote-front-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-vote-front
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: azure-vote-front
+---
+
+# Source: azure-vote/templates/azure-vote-back-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,19 +54,11 @@ spec:
               cpu: 250m
               memory: 256Mi
           ports:
-            - containerPort: 6379
+            - containerPort: 3306
               name: redis
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: azure-vote-back
-spec:
-  ports:
-    - port: 6379
-  selector:
-    app: azure-vote-back
----
+
+# Source: azure-vote/templates/azure-vote-front-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,7 +77,8 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
         - name: azure-vote-front
-          image: microsoft/azure-vote-front:v1
+          image: hellorings.azurecr.io/votingapp:7120
+          imagePullPolicy: Always
           resources:
             requests:
               cpu: 100m
@@ -70,14 +91,4 @@ spec:
           env:
             - name: REDIS
               value: "azure-vote-back"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: azure-vote-front
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-  selector:
-    app: azure-vote-front
+
