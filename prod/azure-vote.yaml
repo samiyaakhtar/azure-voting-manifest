@@ -9,7 +9,7 @@ spec:
   ports:
     - port: 3306
   selector:
-    app: azure-vote
+    app: azure-vote-back
 
 ---
 
@@ -23,7 +23,7 @@ spec:
   ports:
     - port: 80
   selector:
-    app: azure-vote
+    app: azure-vote-front
 ---
 
 # Source: azure-vote/templates/azure-vote-back-deployment.yaml
