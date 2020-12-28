@@ -77,7 +77,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
         - name: azure-vote-front
-          image: hellorings.azurecr.io/votingapp:30733
+          image: hellorings.azurecr.io/votingapp:30755
           resources:
             requests:
               cpu: 100m
